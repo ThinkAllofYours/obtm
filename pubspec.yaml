@@ -2,7 +2,7 @@ name: obtm
 description: "1bite2min"
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.1+2
+version: 1.0.4+4
 
 environment:
   sdk: '>=3.2.6 <4.0.0'

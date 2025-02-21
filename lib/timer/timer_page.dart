@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:obtm/timer/notification.dart';
 import 'timer_controller.dart';
 
 class TimerPage extends StatefulWidget {
@@ -7,13 +8,17 @@ class TimerPage extends StatefulWidget {
   const TimerPage({super.key, required this.goalTimeInSeconds});
 
   @override
+  // ignore: library_private_types_in_public_api
   _TimerPageState createState() => _TimerPageState();
 }
 
 class _TimerPageState extends State<TimerPage> with WidgetsBindingObserver {
   final TimerController _timerController = TimerController();
+  final NotificationService _notificationService = NotificationService();
   bool _isRunning = false;
   int _milliseconds = 0;
+  int id = 1;
+  bool _isNotificate = false;
 
   @override
   void initState() {
@@ -23,11 +28,31 @@ class _TimerPageState extends State<TimerPage> with WidgetsBindingObserver {
     _timerController.onTick = (milliseconds) {
       setState(() {
         _milliseconds = milliseconds;
+        int goalTime = widget.goalTimeInSeconds * 1000;
+        if (_milliseconds >= goalTime && _isNotificate == false) {
+            _showNotification(widget.goalTimeInSeconds);
+            _isNotificate = true; 
+        }
       });
     };
     //타이머의 현재 상태를 반영
+    _notificationService.init();
     _milliseconds = _timerController.currentMilliseconds;
     _isRunning = _timerController.isRunning;
+  }
+
+  void _showNotification(int milliseconds) async {
+    final int seconds = (milliseconds / 1000).floor();
+    final int minutes = seconds ~/ 60;
+    final int displaySeconds = seconds % 60;
+    final int displayMilliseconds = (milliseconds / 10).floor() % 100;
+    final String formattedTime =
+        '${minutes.toString().padLeft(2, '0')}:${displaySeconds.toString().padLeft(2, '0')}.${displayMilliseconds.toString().padLeft(2, '0')}';
+    await _notificationService.showNotification(
+      id++,
+      'Timer Complete!',
+      'Reached its goal : $formattedTime',
+    );
   }
 
   void _toggleTimer() {
@@ -36,6 +61,7 @@ class _TimerPageState extends State<TimerPage> with WidgetsBindingObserver {
       _timerController.stopAndResetTimer();
     } else {
       _timerController.startTimer();
+      _isNotificate = false;
     }
     _isRunning = !_isRunning;
   }
@@ -64,7 +90,10 @@ class _TimerPageState extends State<TimerPage> with WidgetsBindingObserver {
         backgroundColor: Colors.deepPurple,
         actions: [
           IconButton(
-            icon: const Icon(Icons.delete, color: Colors.white,),
+            icon: const Icon(
+              Icons.delete,
+              color: Colors.white,
+            ),
             onPressed: _clearList,
             tooltip: 'Clear List',
           ),
@@ -88,7 +117,8 @@ class _TimerPageState extends State<TimerPage> with WidgetsBindingObserver {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
             child: LinearProgressIndicator(
               value: progress,
               backgroundColor: const Color(0xFFB1DC0C),

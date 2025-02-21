@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:obtm/timer/notification.dart';
 import 'timer/timer_page.dart';
 import 'setting/setting_page.dart';
 
@@ -14,10 +15,13 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   var selectedIndex = 0;
   int goalTimeInSeconds = 60; // 초깃값을 1분(60초)으로 설정
+  final notificationService = NotificationService();
 
   @override
   void initState() {
     super.initState();
+
+    notificationService.init();
     // 모바일 환경에서는 세로 모드 고정
     _setPreferredOrientations();
   }
